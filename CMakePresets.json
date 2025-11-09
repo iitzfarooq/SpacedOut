@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "debug-msvc",
+      "generator": "Ninja",
+      "binaryDir": "build_debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+        "name": "release-msvc",
+        "generator": "Ninja",
+        "binaryDir": "build_release",
+        "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Release"
+        }
+    }
+  ],
+  "buildPresets": [
+    {
+        "name": "debug-engine",
+        "configurePreset": "debug-msvc",
+        "targets": ["engine"]
+    },
+    {
+        "name": "debug-tests",
+        "configurePreset": "debug-msvc",
+        "targets": ["engine_tests"]
+    },
+    {
+        "name": "debug-engine-core",
+        "configurePreset": "debug-msvc",
+        "targets": ["engine_core"]
+    },
+    {
+        "name": "release-all",
+        "configurePreset": "release-msvc",
+        "targets": ["engine", "engine_core", "engine_tests"]
+    }
+  ]
+}

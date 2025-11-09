@@ -1,0 +1,36 @@
+{
+    "cmake.useCMakePresets": "always",
+    "cmake.generator": "Ninja",
+    "cmake.preferredGenerators": ["Ninja"], 
+    "cmake.configureOnOpen": true,
+    "terminal.integrated.profiles.windows": {
+        "VS 2022 Dev PowerShell": {
+            "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "args": [
+                "-NoExit",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "& 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\Launch-VsDevShell.ps1' -Arch amd64 -SkipAutomaticLocation && cls"
+            ],
+            "icon": "terminal-powershell"
+        },
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        }
+    },
+    "files.associations": {
+        "concepts": "cpp"
+    }
+}
