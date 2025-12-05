@@ -32,5 +32,13 @@
     },
     "files.associations": {
         "concepts": "cpp"
+    },
+    
+    "material-icon-theme.folders.associations": {
+        "agent": "robot",
+        "models": "database",
+        "physics": "atom",      // alternatives: "beaker", "molecule", "science"
+        "simulator": "controller",   // alternatives: "gear", "circuit-board", "play"
+        "engine": "tools",
     }
 }
