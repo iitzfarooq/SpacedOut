@@ -4,7 +4,7 @@
 #include "models/base.hpp"
 #include "physics/orbits.hpp"
 
-namespace ii::engine {
+namespace ii {
     struct CelestialBody : public BaseModel {
         const f64 radius;
         const f64 mass;

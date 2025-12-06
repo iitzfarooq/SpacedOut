@@ -1,6 +1,6 @@
 #include "celestial_bodies.hpp"
 
-namespace ii::engine {
+namespace ii {
     CelestialBody::CelestialBody(i32 id, std::string name, f64 radius, f64 mass)
         : BaseModel{id, std::move(name)}, radius{radius}, mass{mass} {}
 

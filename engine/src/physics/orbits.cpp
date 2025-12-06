@@ -1,6 +1,6 @@
 #include "orbits.hpp"
 
-namespace ii::engine {
+namespace ii {
     SimpleOrbit::SimpleOrbit(
         f64 a, f64 b, f64 w, f64 phi, f64 rotation, Vec2d center
     )   : a{a}, b{b}, w{w}, phi{phi}, rotation{rotation}, center{center} {}

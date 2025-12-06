@@ -4,7 +4,7 @@
 #include <cmath>
 #include "utils/types.hpp"
 
-namespace ii::engine {
+namespace ii {
     struct Orbit {
         virtual ~Orbit() = default;
         virtual Vec2d pos(f64 time) const = 0;

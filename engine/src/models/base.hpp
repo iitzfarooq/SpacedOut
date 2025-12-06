@@ -3,7 +3,7 @@
 #include <string>
 #include "utils/types.hpp"
 
-namespace ii::engine {
+namespace ii {
     struct BaseModel {
         const i32 id;
         const std::string name;
