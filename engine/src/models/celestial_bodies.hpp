@@ -2,7 +2,7 @@
 
 #include "utils/types.hpp"
 #include "models/base.hpp"
-#include "physics/orbits.hpp"
+#include "world/orbits.hpp"
 
 namespace ii {
     struct CelestialBody : public BaseModel {
