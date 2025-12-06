@@ -27,9 +27,9 @@ namespace ii {
     }
 
     template <typename T>
-    using uptr = std::unique_ptr<T>;
+    using Uptr = std::unique_ptr<T>;
     template <typename T>
-    using sptr = std::shared_ptr<T>;
+    using Sptr = std::shared_ptr<T>;
 
     template <typename T, typename... Args>
     inline auto make_uptr(Args&&... args) {
@@ -42,19 +42,19 @@ namespace ii {
     }
 
     template <typename T>
-    using opt = std::optional<T>;
+    using Opt = std::optional<T>;
 
     template <typename T>
-    using stdvec = std::vector<T>;
+    using Stdvec = std::vector<T>;
 
-    using vec2d = Eigen::Vector2d;
-    using vec2f = Eigen::Vector2f;
-    using mat2 = Eigen::Matrix2d;
-    using mat3 = Eigen::Matrix3d;
-    using affine2d = Eigen::Affine2d;
-    using translation2d = Eigen::Translation2d;
-    using rotation2d = Eigen::Rotation2Dd;
-    using alignscaling2d = Eigen::AlignedScaling2d;
+    using Vec2d = Eigen::Vector2d;
+    using Vec2f = Eigen::Vector2f;
+    using Mat2 = Eigen::Matrix2d;
+    using Mat3 = Eigen::Matrix3d;
+    using Affine2d = Eigen::Affine2d;
+    using Translation2d = Eigen::Translation2d;
+    using Rotation2d = Eigen::Rotation2Dd;
+    using Alignscaling2d = Eigen::AlignedScaling2d;
 
     template<typename Scalar = f64>
     using Vector2 = Eigen::Matrix<Scalar, 2, 1>;
