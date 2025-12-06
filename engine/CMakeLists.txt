@@ -2,7 +2,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(Eigen3 CONFIG REQUIRED) 
+find_package(Eigen3 CONFIG REQUIRED)
+find_package(range-v3 CONFIG REQUIRED)
 
 # ---- Engine Core library ----
 file(GLOB_RECURSE ENGINE_SRC "src/*.cpp")
@@ -15,6 +16,7 @@ nlohmann_json::nlohmann_json
 CLI11::CLI11 
 spdlog::spdlog
 Eigen3::Eigen
+range-v3::range-v3
 )
 
 # ---- Engine executable ----

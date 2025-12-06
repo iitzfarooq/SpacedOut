@@ -6,6 +6,7 @@
         "nlohmann-json",
         "spdlog",
         "gtest",
-        "eigen3"
+        "eigen3",
+        "range-v3"
     ]
 }
