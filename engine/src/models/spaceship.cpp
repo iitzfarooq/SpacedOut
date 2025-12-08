@@ -1,4 +1,5 @@
 #include "spaceship.hpp"
+#include "utils/helpers.hpp"
 
 namespace ii {
     Spaceship::Spaceship(
@@ -8,6 +9,13 @@ namespace ii {
         dry_mass{dry_mass},
         max_fuel{max_fuel},
         exhaust_speed{exhaust_speed},
-        thrust_levels{thrust_levels}
-    {}
+        thrust_levels{thrust_levels} {
+        req(dry_mass > 0.0, "Dry mass must be positive.");
+        req(max_fuel >= 0.0, "Max fuel cannot be negative.");
+        req(exhaust_speed >= 0.0, "Exhaust speed cannot be negative.");
+        req(!thrust_levels.empty(), "Thrust levels must be provided.");
+        for (const auto& thrust : thrust_levels) {
+            req(thrust >= 0.0, "Thrust levels cannot be negative.");
+        }
+    }
 }

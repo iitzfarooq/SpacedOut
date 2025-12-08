@@ -11,7 +11,7 @@
 namespace ii {
 
 struct MathConfig {
-    static constexpr f64 epsilon = 1e-12f;
+    static constexpr f64 epsilon = 1e-10f;
     static constexpr f64 pi = std::numbers::pi;
     static constexpr f64 inv_pi = std::numbers::inv_pi;
     static constexpr f64 inf = std::numeric_limits<f64>::infinity();
