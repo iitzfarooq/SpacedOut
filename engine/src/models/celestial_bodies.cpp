@@ -2,16 +2,16 @@
 #include "utils/helpers.hpp"
 
 namespace ii {
-    CelestialBody::CelestialBody(i32 id, std::string name, f64 radius, f64 mass)
-        : BaseModel{id, std::move(name)}, radius{radius}, mass{mass} {
+    CelestialBody::CelestialBody(i32 id, const std::string& name, f64 radius, f64 mass)
+        : BaseModel{id, name}, radius{radius}, mass{mass} {
         req(radius > 0.0, "Radius must be positive");
         req(mass > 0.0, "Mass must be positive");
     }
 
     OrbitalBody::OrbitalBody(
-        i32 id, std::string name, f64 radius, f64 mass, 
+        i32 id, const std::string& name, f64 radius, f64 mass,
         Uptr<SimpleOrbit> orbit
-    ) : CelestialBody{id, std::move(name), radius, mass}, orbit{std::move(orbit)} {
+    ) : CelestialBody{id, name, radius, mass}, orbit{std::move(orbit)} {
         req(this->orbit != nullptr, "Orbit must not be null");
     }
 
@@ -24,9 +24,9 @@ namespace ii {
     }
 
     StationaryBody::StationaryBody(
-        i32 id, std::string name, f64 radius, f64 mass, 
-        Vec2d position
-    ) : CelestialBody{id, std::move(name), radius, mass}, position{std::move(position)} {}
+        i32 id, const std::string& name, f64 radius, f64 mass,
+        const Vec2d& position
+    ) : CelestialBody{id, name, radius, mass}, position{position} {}
 
     Vec2d StationaryBody::pos(f64 /*time*/) const {
         return position;

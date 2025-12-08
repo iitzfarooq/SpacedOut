@@ -9,7 +9,7 @@ namespace ii {
         const i32 id;
         const std::string name;
 
-        inline BaseModel(i32 id, std::string name) : id{id}, name{std::move(name)} {
+        inline BaseModel(i32 id, const std::string& name) : id{id}, name{name} {
             req(id >= 0, "ID must be non-negative.");
         }
         virtual ~BaseModel() = default;

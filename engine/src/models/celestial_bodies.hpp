@@ -14,7 +14,7 @@ namespace ii {
         const f64 mass;
 
         // @pre radius > 0 ∧ mass > 0
-        CelestialBody(i32 id, std::string name, f64 radius, f64 mass);
+        CelestialBody(i32 id, const std::string& name, f64 radius, f64 mass);
         virtual ~CelestialBody() = default;
             
         virtual Vec2d pos(f64 time) const = 0;
@@ -31,7 +31,7 @@ namespace ii {
 
         // @pre radius > 0 ∧ mass > 0 ∧ orbit ≠ nullptr
         OrbitalBody(
-            i32 id, std::string name, f64 radius, f64 mass, 
+            i32 id, const std::string& name, f64 radius, f64 mass,
             Uptr<SimpleOrbit> orbit
         );
 
@@ -49,8 +49,8 @@ namespace ii {
 
         // @pre radius > 0 ∧ mass > 0
         StationaryBody(
-            i32 id, std::string name, f64 radius, f64 mass, 
-            Vec2d position
+            i32 id, const std::string& name, f64 radius, f64 mass,
+            const Vec2d& position
         );
 
         virtual Vec2d pos(f64 time) const override;

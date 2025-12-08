@@ -2,7 +2,7 @@
 
 namespace ii {
     SimpleOrbit::SimpleOrbit(
-        f64 a, f64 b, f64 w, f64 phi, f64 rotation, Vec2d center
+        f64 a, f64 b, f64 w, f64 phi, f64 rotation, const Vec2d& center
     )   : a{a}, b{b}, w{w}, phi{phi}, rotation{rotation}, center{center} {}
 
     Vec2d SimpleOrbit::pos(f64 time) const {
@@ -11,10 +11,8 @@ namespace ii {
             b * std::sin(w * time + phi)
         };
 
-        Affine2d transform = (
-            Translation2d{center} * 
-            Rotation2d{rotation}
-        );
+        Affine2d transform = Affine2d::Identity();
+        transform.rotate(this->rotation).translate(this->center);
 
         return transform * pos;
     }
@@ -25,10 +23,8 @@ namespace ii {
             b * w * std::cos(w * time + phi)
         };
 
-        Affine2d transform = (
-            Affine2d::Identity() *
-            Rotation2d{rotation}
-        );
+        Affine2d transform = Affine2d::Identity();
+        transform.rotate(this->rotation);
 
         return transform * vel;
     }
