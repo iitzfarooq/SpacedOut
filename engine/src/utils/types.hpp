@@ -7,6 +7,7 @@
 #include <vector>
 #include <concepts>
 #include <type_traits>
+#include <functional>
 
 #include <Eigen/Geometry>
 
@@ -30,6 +31,12 @@ namespace ii {
     using Uptr = std::unique_ptr<T>;
     template <typename T>
     using Sptr = std::shared_ptr<T>;
+
+    template <typename T>
+    using Ref = std::reference_wrapper<T>;
+
+    template <typename T>
+    using CRef = std::reference_wrapper<const T>;
 
     template <typename T, typename... Args>
     inline auto make_uptr(Args&&... args) {
