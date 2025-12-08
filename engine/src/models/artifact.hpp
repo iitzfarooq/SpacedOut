@@ -4,6 +4,10 @@
 #include "utils/types.hpp"
 
 namespace ii {
+    /**
+     * Artifact: Stationary point object
+     * AF(position) = Object permanently at position, pos(t) = position ∀t
+     */
     struct Artifact : public BaseModel {
         const Vec2d position;
 
