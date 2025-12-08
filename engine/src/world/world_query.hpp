@@ -20,87 +20,78 @@ namespace ii {
     template<typename T>
     concept CelestialLike = std::derived_from<T, CelestialBody>;
 
+    /**
+     * WorldQuery: read-only query API over a `WorldStorage` instance.
+     * AF = provides lazy views and filters over stored entity collections
+     *      (e.g. within_radius, within_rect, open_wormholes, massive_bodies).
+     * RI = referenced `WorldStorage` (storage_) must outlive this WorldQuery.
+     */
     class WorldQuery {
     private:
         const WorldStorage& storage_;
 
     public:
         explicit WorldQuery(const WorldStorage& storage);
-
-        // ----------------------------------------------------
-        // 1. TYPE-SPECIFIC VIEWS (returns ranges of raw pointers)
-        // ----------------------------------------------------
+        ~WorldQuery() = default;
 
         inline auto all_wormholes() const {
             return storage_.wormholes()
-                | std::views::transform([](const auto& ptr) { return ptr.get(); });
+                | std::views::transform([](const auto& ptr) {
+                    return std::cref<Wormhole>(*ptr);
+                });
         }
 
         inline auto all_artifacts() const {
             return storage_.artifacts()
-                | std::views::transform([](const auto& ptr) { return ptr.get(); });
+                | std::views::transform([](const auto& ptr) {
+                    return std::cref<Artifact>(*ptr);
+                });
         }
 
         inline auto all_celestial_bodies() const {
             return storage_.celestial_bodies()
-                | std::views::transform([](const auto& ptr) { return ptr.get(); });
+                | std::views::transform([](const auto& ptr) {
+                    return std::cref<CelestialBody>(*ptr);
+                });
         }
 
         inline auto all_spaceships() const {
             return storage_.spaceships()
-                | std::views::transform([](const auto& ptr) { return ptr.get(); });
+                | std::views::transform([](const auto& ptr) {
+                    return std::cref<Spaceship>(*ptr);
+                });
         }
-
-        // ----------------------------------------------------
-        // 2. SPATIAL QUERIES (for objects with position)
-        // ----------------------------------------------------
 
         template<HasPosition T>
         auto within_radius(const Vec2d& center, f64 radius, f64 time) const {
-            auto all_objects = get_all_of_type<T>();
-
-            return all_objects
-                | std::views::filter([center, radius, time] (const T* obj) {
-                    if (!obj) return false;
-                    const Vec2d pos = obj->pos(time);
+            return get_all_of_type<T>()
+                | std::views::filter([center, radius, time](CRef<T> obj) {
+                    const Vec2d& pos = obj.get().pos(time);
                     return (pos - center).norm() <= radius;
                 });
         }
 
         template<HasPosition T>
         auto within_rect(const Vec2d& min, const Vec2d& max, f64 time) const {
-            auto all_objects = get_all_of_type<T>();
-
-            return all_objects
-                | std::views::filter([min, max, time] (const T* obj) {
-                    if (!obj) return false;
-                    const Vec2d pos = obj->pos(time);
+            return get_all_of_type<T>()
+                | std::views::filter([min, max, time](CRef<T> obj) {
+                    const Vec2d pos = obj.get().pos(time);
                     return (pos.x() >= min.x() && pos.x() <= max.x())
                         && (pos.y() >= min.y() && pos.y() <= max.y());
                 });
         }
 
-        // ----------------------------------------------------
-        // 3. FILTERED QUERIES
-        // ----------------------------------------------------
-
         inline auto open_wormholes(f64 time) const {
-            return storage_.wormholes()
-                | std::views::filter([time](const Uptr<Wormhole>& wh) {
-                    return wh && wh->is_open(time);
-                })
-                | std::views::transform([](const Uptr<Wormhole>& wh) {
-                    return wh.get();
+            return all_wormholes()
+                | std::views::filter([time](CRef<Wormhole> wh) {
+                    return wh.get().is_open(time);
                 });
         }
 
         inline auto massive_bodies(f64 min_mass) const {
-            return storage_.celestial_bodies()
-                | std::views::filter([min_mass](const Uptr<CelestialBody>& cb) {
-                    return cb && cb->mass >= min_mass;
-                })
-                | std::views::transform([](const Uptr<CelestialBody>& cb) {
-                    return cb.get();
+            return all_celestial_bodies()
+                | std::views::filter([min_mass](CRef<CelestialBody> cb) {
+                    return cb.get().mass >= min_mass;
                 });
         }
 
@@ -110,7 +101,7 @@ namespace ii {
                     return cb && dynamic_cast<const OrbitalBody*>(cb.get()) != nullptr;
                 })
                 | std::views::transform([](const Uptr<CelestialBody>& cb) {
-                    return static_cast<const OrbitalBody*>(cb.get());
+                    return std::cref<OrbitalBody>(*static_cast<const OrbitalBody*>(cb.get()));
                 });
         }
 
@@ -120,7 +111,7 @@ namespace ii {
                     return cb && dynamic_cast<const StationaryBody*>(cb.get()) != nullptr;
                 })
                 | std::views::transform([](const Uptr<CelestialBody>& cb) {
-                    return static_cast<const StationaryBody*>(cb.get());
+                    return std::cref<StationaryBody>(*static_cast<const StationaryBody*>(cb.get()));
                 });
         }
 
@@ -136,7 +127,7 @@ namespace ii {
             } else if constexpr (std::is_same_v<T, Spaceship>) {
                 return all_spaceships();
             } else {
-                static_assert(false, "Unsupported type for WorldQuery::get_all_of_type");
+                return std::views::empty<CRef<T>>;
             }
         }
     };

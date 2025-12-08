@@ -1,9 +1,11 @@
 #pragma once
 
+#include <span>
+#include <tuple>
 #include <vector>
-#include <ranges>
-#include <unordered_map>
+#include <memory>
 #include <concepts>
+#include <unordered_map>
 #include "utils/types.hpp"
 #include "models/base.hpp"
 #include "models/artifact.hpp"
@@ -12,6 +14,12 @@
 #include "models/celestial_bodies.hpp"
 
 namespace ii {
+    /**
+     * WorldStorage: in-memory owner of world entities.
+     * AF = stores exclusive ownership of Wormhole, Artifact, CelestialBody, and Spaceship
+     *      and provides accessors + id lookup.
+     * RI = each entity has id \ge 0; ownership is unique (std::unique_ptr).
+     */
     class WorldStorage {
     private:
         std::vector<std::unique_ptr<Wormhole>> wormholes_;
@@ -23,10 +31,16 @@ namespace ii {
 
     public:
         WorldStorage() = default;
+        ~WorldStorage() = default;
+
+        WorldStorage(const WorldStorage&) = delete;
+        WorldStorage& operator=(const WorldStorage&) = delete;
+        WorldStorage(WorldStorage&&) noexcept = default;
+        WorldStorage& operator=(WorldStorage&&) noexcept = default;
 
         template<typename T, typename... Args>
         requires std::derived_from<T, BaseModel>
-        T* add_entity(Args&&... args) {
+        Ref<T> add_entity(Args&&... args) {
             auto entity = std::make_unique<T>(std::forward<Args>(args)...);
             T* raw = entity.get();
 
@@ -34,43 +48,29 @@ namespace ii {
                 wormholes_.push_back(std::move(entity));
             } else if constexpr (std::is_same_v<T, Artifact>) {
                 artifacts_.push_back(std::move(entity));
-            } else if constexpr (std::is_same_v<T, CelestialBody>) {
+            } else if constexpr (std::derived_from<T, CelestialBody>) {
                 celestial_bodies_.push_back(std::move(entity));
             } else if constexpr (std::is_same_v<T, Spaceship>) {
                 spaceships_.push_back(std::move(entity));
             }
 
             id_to_entity_[raw->id] = raw;
-            return raw;
+            return std::ref(*raw);
         }
 
-        inline auto& wormholes() { return wormholes_; }
-        inline auto& artifacts() { return artifacts_; }
-        inline auto& celestial_bodies() { return celestial_bodies_; }
-        inline auto& spaceships() { return spaceships_; }
-
-        inline const auto& wormholes() const { return wormholes_; }
-        inline const auto& artifacts() const { return artifacts_; }
-        inline const auto& celestial_bodies() const { return celestial_bodies_; }
-        inline const auto& spaceships() const { return spaceships_; }
+        auto wormholes() const -> std::span<const Uptr<Wormhole>>;
+        auto artifacts() const -> std::span<const Uptr<Artifact>>;
+        auto celestial_bodies() const -> std::span<const Uptr<CelestialBody>>;
+        auto spaceships() const -> std::span<const Uptr<Spaceship>>;
 
         template <typename T>
-        inline T* get_by_id(i32 id) const {
-            const auto it = id_to_entity_.find(id);
-            return it != id_to_entity_.end() ? dynamic_cast<T*>(it->second) : nullptr;
-        }
+        std::optional<CRef<T>> get_by_id(i32 id) const;
 
-        inline void clear() {
-            wormholes_.clear();
-            artifacts_.clear();
-            celestial_bodies_.clear();
-            spaceships_.clear();
-            id_to_entity_.clear();
-        }
+        template <typename T>
+        std::optional<Ref<T>> get_by_id(i32 id);
 
-        inline usize total_count() const {
-            return wormholes_.size() + artifacts_.size() + celestial_bodies_.size() + spaceships_.size();
-        }
-
+        void clear();
+        usize total_count() const;
+        bool remove_by_id(i32 id);
     };
 }
