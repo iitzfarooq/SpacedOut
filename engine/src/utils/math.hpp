@@ -69,6 +69,44 @@ struct MathConfig {
         return std::round(value);
     }
 
+    template <typename State>
+    class Integrator {
+    public:
+        using StepFunction = std::function<State(const State&, f64)>;
+
+        enum class Method { Euler, RK4, VERLET };
+
+        inline explicit Integrator(const Method method = Method::RK4) : method_(method) {}
+
+        inline State integrate(
+            const State& start_state, f64 t0, f64 dt, const StepFunction& f
+        ) {
+            switch (method_) {
+            case Method::Euler:
+                return euler_step(start_state, t0, dt, f);
+            case Method::RK4:
+                return rk4_step(start_state, t0, dt, f);
+            default:
+                throw std::invalid_argument("Unsupported integration method");
+            }
+        }
+
+    private:
+        const Method method_;
+
+        inline State euler_step(const State& state, f64 t, f64 dt, const StepFunction& f) {
+            State deriv = f(state, t);
+            return state + deriv * dt;
+        }
+
+        inline State rk4_step(const State& state, f64 t, f64 dt, const StepFunction& f) {
+            State k1 = f(state, t);
+            State k2 = f(state + k1 * (dt / 2.0), t + dt / 2.0);
+            State k3 = f(state + k2 * (dt / 2.0), t + dt / 2.0);
+            State k4 = f(state + k3 * dt, t + dt);
+            return state + (k1 + 2.0 * k2 + 2.0 * k3 + k4) * (dt / 6.0);
+        }
+    };
 };
 
 }
