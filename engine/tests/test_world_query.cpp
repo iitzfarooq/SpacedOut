@@ -9,7 +9,7 @@
 #include "models/celestial_bodies.hpp"
 #include "models/wormhole.hpp"
 #include "models/spaceship.hpp"
-#include "world/orbits.hpp"
+#include "world/trajectory.hpp"
 
 using namespace ii;
 
@@ -30,17 +30,20 @@ protected:
         // A2: (-5, 5)
         storage.add_entity<Artifact>(2, "A2", Vec2d{-5.0, 5.0});
 
-        // 2. Stationary Bodies
+        // 2. Stationary Bodies (CelestialBody with StationaryTrajectory)
         // S1: (0, 0), Mass 100
-        storage.add_entity<StationaryBody>(3, "Sun", 10.0, 100.0, Vec2d{0.0, 0.0});
+        auto traj1 = std::make_unique<StationaryTrajectory>(Vec2d{0.0, 0.0});
+        storage.add_entity<CelestialBody>(3, "Sun", 10.0, 100.0, std::move(traj1));
+        
         // S2: (20, 20), Mass 50
-        storage.add_entity<StationaryBody>(4, "Star2", 5.0, 50.0, Vec2d{20.0, 20.0});
+        auto traj2 = std::make_unique<StationaryTrajectory>(Vec2d{20.0, 20.0});
+        storage.add_entity<CelestialBody>(4, "Star2", 5.0, 50.0, std::move(traj2));
 
-        // 3. Orbital Bodies
+        // 3. Orbital Bodies (CelestialBody with EllipticalTrajectory)
         // O1: Orbit around (0,0), radius 10, period 2pi (w=1)
         // pos(t) = (10 cos(t), 10 sin(t))
-        auto orbit1 = std::make_unique<SimpleOrbit>(10.0, 10.0, 1.0, 0.0, 0.0, Vec2d{0.0, 0.0});
-        storage.add_entity<OrbitalBody>(5, "Planet1", 2.0, 10.0, std::move(orbit1));
+        auto traj3 = std::make_unique<EllipticalTrajectory>(10.0, 10.0, 1.0, 0.0, 0.0, Vec2d{0.0, 0.0});
+        storage.add_entity<CelestialBody>(5, "Planet1", 2.0, 10.0, std::move(traj3));
 
         // 4. Wormholes
         // W1: Open [0, 10]
@@ -233,7 +236,7 @@ TEST_F(WorldQueryTest, MassiveBodies) {
 /**
  * Test Suite: WorldQuery::orbital_bodies
  * Partitions:
- * - Type check: Should only return OrbitalBody
+ * - Type check: Should only return CelestialBody with EllipticalTrajectory (not StationaryTrajectory)
  */
 TEST_F(WorldQueryTest, OrbitalBodiesOnly) {
     WorldQuery query(storage);
@@ -248,7 +251,7 @@ TEST_F(WorldQueryTest, OrbitalBodiesOnly) {
 /**
  * Test Suite: WorldQuery::stationary_bodies
  * Partitions:
- * - Type check: Should only return StationaryBody
+ * - Type check: Should only return CelestialBody with StationaryTrajectory
  */
 TEST_F(WorldQueryTest, StationaryBodiesOnly) {
     WorldQuery query(storage);

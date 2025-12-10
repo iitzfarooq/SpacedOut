@@ -98,20 +98,20 @@ namespace ii {
         inline auto orbital_bodies() const {
             return storage_.celestial_bodies()
                 | std::views::filter([](const Uptr<CelestialBody>& cb) {
-                    return cb && dynamic_cast<const OrbitalBody*>(cb.get()) != nullptr;
+                    return cb && dynamic_cast<const StationaryTrajectory*>(cb->trajectory.get()) == nullptr;
                 })
                 | std::views::transform([](const Uptr<CelestialBody>& cb) {
-                    return std::cref<OrbitalBody>(*static_cast<const OrbitalBody*>(cb.get()));
+                    return std::cref<CelestialBody>(*cb);
                 });
         }
 
         inline auto stationary_bodies() const {
             return storage_.celestial_bodies()
                 | std::views::filter([](const Uptr<CelestialBody>& cb) {
-                    return cb && dynamic_cast<const StationaryBody*>(cb.get()) != nullptr;
+                    return cb && dynamic_cast<const StationaryTrajectory*>(cb->trajectory.get()) != nullptr;
                 })
                 | std::views::transform([](const Uptr<CelestialBody>& cb) {
-                    return std::cref<StationaryBody>(*static_cast<const StationaryBody*>(cb.get()));
+                    return std::cref<CelestialBody>(*cb);
                 });
         }
 

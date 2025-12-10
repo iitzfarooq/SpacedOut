@@ -2,37 +2,19 @@
 #include "utils/helpers.hpp"
 
 namespace ii {
-    CelestialBody::CelestialBody(i32 id, const std::string& name, f64 radius, f64 mass)
-        : BaseModel{id, name}, radius{radius}, mass{mass} {
+    CelestialBody::CelestialBody(i32 id, const std::string& name, f64 radius, f64 mass, Uptr<Trajectory> trajectory)
+        : BaseModel{id, name}, radius{radius}, mass{mass}, trajectory{std::move(trajectory)} {
         req(radius > 0.0, "Radius must be positive");
         req(mass > 0.0, "Mass must be positive");
+        req(this->trajectory != nullptr, "Trajectory must not be null");
     }
 
-    OrbitalBody::OrbitalBody(
-        i32 id, const std::string& name, f64 radius, f64 mass,
-        Uptr<SimpleOrbit> orbit
-    ) : CelestialBody{id, name, radius, mass}, orbit{std::move(orbit)} {
-        req(this->orbit != nullptr, "Orbit must not be null");
+    Vec2d CelestialBody::pos(f64 time) const {
+        return trajectory->pos(time);
     }
 
-    Vec2d OrbitalBody::pos(f64 time) const {
-        return orbit->pos(time);
+    Vec2d CelestialBody::vel(f64 time) const {
+        return trajectory->vel(time);
     }
 
-    Vec2d OrbitalBody::vel(f64 time) const {
-        return orbit->vel(time);
-    }
-
-    StationaryBody::StationaryBody(
-        i32 id, const std::string& name, f64 radius, f64 mass,
-        const Vec2d& position
-    ) : CelestialBody{id, name, radius, mass}, position{position} {}
-
-    Vec2d StationaryBody::pos(f64 /*time*/) const {
-        return position;
-    }
-
-    Vec2d StationaryBody::vel(f64 /*time*/) const {
-        return Vec2d{0.0, 0.0};
-    }
 }

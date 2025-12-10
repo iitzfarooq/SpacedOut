@@ -65,12 +65,12 @@ namespace ii {
 
         template <typename T>
         std::optional<CRef<T>> get_by_id(i32 id) const;
-
         template <typename T>
         std::optional<Ref<T>> get_by_id(i32 id);
 
+        bool remove_by_id(i32 id);
+
         void clear();
         usize total_count() const;
-        bool remove_by_id(i32 id);
     };
 }

@@ -8,7 +8,7 @@
  * ========== PARTITION DEFINITIONS ==========
  *
  * 1. add_entity<T>() partitions:
- *    - Entity type T: {Wormhole, Artifact, CelestialBody (OrbitalBody, StationaryBody), Spaceship}
+ *    - Entity type T: {Wormhole, Artifact, CelestialBody, Spaceship}
  *    - Storage state: {empty, non-empty}
  *    - Number of entities added: {1, multiple}
  *
@@ -42,6 +42,7 @@
 #include "models/artifact.hpp"
 #include "models/celestial_bodies.hpp"
 #include "models/spaceship.hpp"
+#include "world/trajectory.hpp"
 
 using namespace ii;
 
@@ -58,16 +59,18 @@ namespace {
         return Artifact{id, name, Vec2d{50.0, 50.0}};
     }
 
-    StationaryBody make_stationary_body(i32 id, const std::string& name = "star") {
-        return StationaryBody{id, name, 10.0, 1000.0, Vec2d{0.0, 0.0}};
+    // Helper to create a CelestialBody with StationaryTrajectory
+    Uptr<CelestialBody> make_stationary_body(i32 id, const std::string& name = "star") {
+        auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0.0, 0.0});
+        return std::make_unique<CelestialBody>(id, name, 10.0, 1000.0, std::move(traj));
     }
 
     Spaceship make_spaceship(i32 id, const std::string& name = "ship") {
         return Spaceship{id, name, 100.0, 50.0, {0.0, 10.0, 50.0}, 3000.0};
     }
 
-    Uptr<SimpleOrbit> make_simple_orbit() {
-        return std::make_unique<SimpleOrbit>(100.0, 80.0, 0.1, 0.0, 0.0, Vec2d{0.0, 0.0});
+    Uptr<EllipticalTrajectory> make_elliptical_trajectory() {
+        return std::make_unique<EllipticalTrajectory>(100.0, 80.0, 0.1, 0.0, 0.0, Vec2d{0.0, 0.0});
     }
 }
 
@@ -117,17 +120,18 @@ TEST(WorldStorageAddEntity, AddArtifactToEmptyStorage) {
 
 /**
  * Partition coverage:
- * - Entity type: StationaryBody (CelestialBody subtype)
+ * - Entity type: CelestialBody (with StationaryTrajectory)
  * - Storage state: empty -> non-empty
  * - Number added: 1
  */
-TEST(WorldStorageAddEntity, AddStationaryBodyToEmptyStorage) {
+TEST(WorldStorageAddEntity, AddStationaryCelestialBodyToEmptyStorage) {
     WorldStorage storage;
 
-    auto ref = storage.add_entity<StationaryBody>(
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0.0, 0.0});
+    auto ref = storage.add_entity<CelestialBody>(
         3, std::string{"sun"},
         695700.0, 1.989e30,
-        Vec2d{0.0, 0.0}
+        std::move(traj)
     );
 
     EXPECT_EQ(ref.get().id, 3);
@@ -137,17 +141,17 @@ TEST(WorldStorageAddEntity, AddStationaryBodyToEmptyStorage) {
 
 /**
  * Partition coverage:
- * - Entity type: OrbitalBody (CelestialBody subtype)
+ * - Entity type: CelestialBody (with EllipticalTrajectory)
  * - Storage state: empty -> non-empty
  * - Number added: 1
  */
-TEST(WorldStorageAddEntity, AddOrbitalBodyToEmptyStorage) {
+TEST(WorldStorageAddEntity, AddOrbitalCelestialBodyToEmptyStorage) {
     WorldStorage storage;
 
-    auto ref = storage.add_entity<OrbitalBody>(
+    auto ref = storage.add_entity<CelestialBody>(
         4, std::string{"planet"},
         6371.0, 5.972e24,
-        make_simple_orbit()
+        make_elliptical_trajectory()
     );
 
     EXPECT_EQ(ref.get().id, 4);
@@ -188,7 +192,10 @@ TEST(WorldStorageAddEntity, AddMultipleEntitiesOfDifferentTypes) {
     storage.add_entity<Wormhole>(1, std::string{"wh1"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Wormhole>(2, std::string{"wh2"}, Vec2d{5,5}, Vec2d{15,15}, 5.0, 15.0);
     storage.add_entity<Artifact>(3, std::string{"art1"}, Vec2d{20,20});
-    storage.add_entity<StationaryBody>(4, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(4, std::string{"star"}, 100.0, 1e10, std::move(traj));
+    
     storage.add_entity<Spaceship>(5, std::string{"ship1"}, 100.0, 50.0, std::vector<f64>{0.0, 10.0}, 3000.0);
 
     EXPECT_EQ(storage.wormholes().size(), 2);
@@ -313,7 +320,10 @@ TEST(WorldStorageGetById, GetCorrectEntityFromMixedStorage) {
     WorldStorage storage;
     storage.add_entity<Wormhole>(1, std::string{"wh1"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(2, std::string{"art1"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(3, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(3, std::string{"star"}, 100.0, 1e10, std::move(traj));
+    
     storage.add_entity<Spaceship>(4, std::string{"ship"}, 100.0, 50.0, std::vector<f64>{0.0}, 3000.0);
 
     const WorldStorage& cs = storage;
@@ -367,7 +377,9 @@ TEST(WorldStorageRemove, RemoveArtifactFromMixedStorage) {
     WorldStorage storage;
     storage.add_entity<Wormhole>(1, std::string{"wh"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(2, std::string{"art"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(3, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(3, std::string{"star"}, 100.0, 1e10, std::move(traj));
 
     EXPECT_EQ(storage.total_count(), 3);
 
@@ -412,13 +424,16 @@ TEST(WorldStorageRemove, RemoveNonExistingIdFromNonEmptyStorage) {
 /**
  * Partition coverage:
  * - ID existence: exists
- * - Entity type: CelestialBody (StationaryBody)
+ * - Entity type: CelestialBody
  * - Storage state after: still has entities
  */
 TEST(WorldStorageRemove, RemoveCelestialBody) {
     WorldStorage storage;
-    storage.add_entity<StationaryBody>(1, std::string{"sun"}, 100.0, 1e10, Vec2d{0,0});
-    storage.add_entity<OrbitalBody>(2, std::string{"earth"}, 50.0, 1e8, make_simple_orbit());
+    auto traj1 = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(1, std::string{"sun"}, 100.0, 1e10, std::move(traj1));
+    
+    auto traj2 = make_elliptical_trajectory();
+    storage.add_entity<CelestialBody>(2, std::string{"earth"}, 50.0, 1e8, std::move(traj2));
 
     EXPECT_EQ(storage.celestial_bodies().size(), 2);
 
@@ -454,7 +469,9 @@ TEST(WorldStorageRemove, RemoveAllEntitiesSequentially) {
     WorldStorage storage;
     storage.add_entity<Wormhole>(1, std::string{"wh"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(2, std::string{"art"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(3, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(3, std::string{"star"}, 100.0, 1e10, std::move(traj));
 
     EXPECT_EQ(storage.total_count(), 3);
 
@@ -514,7 +531,10 @@ TEST(WorldStorageClear, ClearStorageWithMultipleTypes) {
     WorldStorage storage;
     storage.add_entity<Wormhole>(1, std::string{"wh"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(2, std::string{"art"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(3, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(3, std::string{"star"}, 100.0, 1e10, std::move(traj));
+    
     storage.add_entity<Spaceship>(4, std::string{"ship"}, 100.0, 50.0, std::vector<f64>{0.0}, 3000.0);
 
     EXPECT_EQ(storage.total_count(), 4);
@@ -591,7 +611,10 @@ TEST(WorldStorageTotalCount, MixedTypesCount) {
     storage.add_entity<Wormhole>(1, std::string{"wh"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Wormhole>(2, std::string{"wh2"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(3, std::string{"art"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(4, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(4, std::string{"star"}, 100.0, 1e10, std::move(traj));
+    
     storage.add_entity<Spaceship>(5, std::string{"ship"}, 100.0, 50.0, std::vector<f64>{0.0}, 3000.0);
     storage.add_entity<Spaceship>(6, std::string{"ship2"}, 200.0, 100.0, std::vector<f64>{0.0, 50.0}, 3500.0);
 
@@ -623,7 +646,10 @@ TEST(WorldStorageAccessors, SingleElementCollections) {
     WorldStorage storage;
     storage.add_entity<Wormhole>(1, std::string{"wh"}, Vec2d{0,0}, Vec2d{10,10}, 0.0, 10.0);
     storage.add_entity<Artifact>(2, std::string{"art"}, Vec2d{5,5});
-    storage.add_entity<StationaryBody>(3, std::string{"star"}, 100.0, 1e10, Vec2d{0,0});
+    
+    auto traj = std::make_unique<StationaryTrajectory>(Vec2d{0,0});
+    storage.add_entity<CelestialBody>(3, std::string{"star"}, 100.0, 1e10, std::move(traj));
+    
     storage.add_entity<Spaceship>(4, std::string{"ship"}, 100.0, 50.0, std::vector<f64>{0.0}, 3000.0);
 
     auto wormholes = storage.wormholes();
@@ -698,4 +724,3 @@ TEST(WorldStorageMove, MoveAssignmentTransfersOwnership) {
     EXPECT_EQ(storage2.artifacts().size(), 1);
     EXPECT_EQ(storage2.wormholes().size(), 0);
 }
-
