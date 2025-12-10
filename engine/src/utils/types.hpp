@@ -138,15 +138,4 @@ namespace ii {
     template<typename T>
     concept affine2_like = ii::concepts::AffineTransform2D<T>;
 
-    template<typename T>
-    concept Enum = std::is_enum_v<T>;
-
-    template<Enum T>
-    struct EnumClassHasher {
-        size_t operator() (const T& e) const noexcept {
-            using U = std::underlying_type_t<T>;
-            return std::hash<U>()(static_cast<U>(e));
-        }
-    };
-
 }

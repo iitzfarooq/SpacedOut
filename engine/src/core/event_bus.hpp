@@ -7,6 +7,7 @@
 #include <functional>
 
 #include "utils/types.hpp"
+#include "utils/helpers.hpp"
 
 namespace ii {
     struct Event {

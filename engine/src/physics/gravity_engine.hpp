@@ -21,6 +21,7 @@ namespace ii {
         explicit GravityEngine(const WorldStorage& ws);
         Gravity gravity_at(const Vec2d& x, const f64 t) const;
 
+    private:
         const WorldStorage& ws_;
     };
 }
