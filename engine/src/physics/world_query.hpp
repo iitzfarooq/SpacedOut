@@ -4,7 +4,7 @@
 #include <optional>
 #include <ranges>
 #include "utils/types.hpp"
-#include "world/world_storage.hpp"
+#include "physics/world_storage.hpp"
 
 namespace ii {
     template <typename T>

@@ -2,7 +2,7 @@
 
 #include "utils/types.hpp"
 #include "utils/math.hpp"
-#include "world/world_storage.hpp"
+#include "physics/world_storage.hpp"
 
 namespace ii {
     class GravityEngine {

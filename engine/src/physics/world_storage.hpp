@@ -15,7 +15,7 @@
 
 namespace ii {
     /**
-     * WorldStorage: in-memory owner of world entities.
+     * WorldStorage: in-memory owner of physics entities.
      * AF = stores exclusive ownership of Wormhole, Artifact, CelestialBody, and Spaceship
      *      and provides accessors + id lookup.
      * RI = each entity has id \ge 0; ownership is unique (std::unique_ptr).

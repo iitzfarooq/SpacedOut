@@ -37,12 +37,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "world/world_storage.hpp"
+#include "physics/world_storage.hpp"
 #include "models/wormhole.hpp"
 #include "models/artifact.hpp"
 #include "models/celestial_bodies.hpp"
 #include "models/spaceship.hpp"
-#include "world/trajectory.hpp"
+#include "physics/trajectory.hpp"
 
 using namespace ii;
 

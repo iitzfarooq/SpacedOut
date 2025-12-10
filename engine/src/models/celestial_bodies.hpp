@@ -2,7 +2,7 @@
 
 #include "utils/types.hpp"
 #include "models/base.hpp"
-#include "world/trajectory.hpp"
+#include "physics/trajectory.hpp"
 
 namespace ii {
     /**

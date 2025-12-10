@@ -1,9 +1,9 @@
-#include "gravity_model.hpp"
+#include "gravity_engine.hpp"
 
 namespace ii {
-    GravityModel::GravityModel(const WorldStorage& ws) : ws_(ws) {}
+    GravityEngine::GravityEngine(const WorldStorage& ws) : ws_(ws) {}
 
-    GravityModel::Gravity GravityModel::gravity_at(const Vec2d& x, const f64 t) const {
+    GravityEngine::Gravity GravityEngine::gravity_at(const Vec2d& x, const f64 t) const {
         f64 phi = 0.0;
         Vec2d a{0.0, 0.0};
 

@@ -2,7 +2,7 @@
 
 #include "utils/math.hpp"
 #include "utils/types.hpp"
-#include "world/gravity_engine.hpp"
+#include "physics/gravity_engine.hpp"
 
 namespace ii {
     class RelativityEngine {

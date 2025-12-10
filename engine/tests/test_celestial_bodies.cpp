@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "models/celestial_bodies.hpp"
-#include "world/trajectory.hpp"
+#include "physics/trajectory.hpp"
 
 using namespace ii;
 

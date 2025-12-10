@@ -3,13 +3,13 @@
 #include <memory>
 #include <cmath>
 #include <algorithm>
-#include "world/world_query.hpp"
-#include "world/world_storage.hpp"
+#include "physics/world_query.hpp"
+#include "physics/world_storage.hpp"
 #include "models/artifact.hpp"
 #include "models/celestial_bodies.hpp"
 #include "models/wormhole.hpp"
 #include "models/spaceship.hpp"
-#include "world/trajectory.hpp"
+#include "physics/trajectory.hpp"
 
 using namespace ii;
 
