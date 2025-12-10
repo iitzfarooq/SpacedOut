@@ -23,3 +23,10 @@ struct EnumClassHasher {
         return std::hash<U>()(static_cast<U>(e));
     }
 };
+
+template <typename T>
+class Builder {
+public:
+    virtual ~Builder() = default;
+    virtual T build() const = 0;
+};
